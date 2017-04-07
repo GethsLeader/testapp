@@ -1,0 +1,8 @@
+/.idea
+node_modules/
+/dist
+/src/data/environment.json
+*.css
+*~
+*.tmp
+*.log

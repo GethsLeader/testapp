@@ -1,0 +1,43 @@
+@loaderErrorTextColor: #8e0b00;
+@loaderProgressBarColor: #cecece;
+@loaderProgressBarBordersColor: #989898;
+@loaderProgressFillColor: #01a700;
+@loaderProgressFillColorStart: #01df00;
+@loaderProgressFillColorEnd: #015600;
+
+#loader {
+  width: 230px;
+  height: 100px;
+  padding: 8px;
+  margin: 100px auto 0 auto;
+  text-align: center;
+
+  div.progress {
+    width: 200px;
+    height: 20px;
+    padding: 2px;
+    background: @loaderProgressBarColor;
+    border: 1px solid @loaderProgressBarBordersColor;
+    border-radius: 6px;
+    .fill {
+      position: relative;
+      background: @loaderProgressFillColor linear-gradient(180deg, @loaderProgressFillColorStart, @loaderProgressFillColorEnd);
+      height: 100%;
+      width: 0;
+      border-radius: 6px;
+    }
+  }
+
+  div.error {
+    color: @loaderErrorTextColor;
+    h1 {
+      display: inline;
+      font-size: 16px;
+      margin-right: 8px;
+    }
+    h2 {
+      display: inline;
+      font-size: 12px;
+    }
+  }
+}
