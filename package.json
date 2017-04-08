@@ -23,20 +23,18 @@
     "clean-css": "^4.0.10",
     "copy-webpack-plugin": "^4.0.1",
     "core-js": "^2.4.1",
-    "express": "^4.15.2",
-    "express-session": "^1.15.2",
     "html-minifier": "^3.4.2",
     "jasmine": "^2.5.3",
     "karma": "^1.5.0",
     "karma-chrome-launcher": "^2.0.0",
     "karma-jasmine": "^1.1.0",
     "karma-typescript": "^2.1.7",
-    "ts-loader": "^2.0.3"
+    "ts-loader": "^2.0.3",
+    "webpack-dev-server": "^2.4.2"
   },
   "scripts": {
     "build": "rm -rf dist; webpack --colors;",
-    "watch": "rm -rf dist; webpack --colors --watch;",
-    "server": "node test-server.js",
+    "watch": "rm -rf dist; ./webpack-dev-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "GethsLeader <GethsLeader@gmail.com>",
