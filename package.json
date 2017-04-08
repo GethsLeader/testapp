@@ -34,7 +34,7 @@
   },
   "scripts": {
     "build": "rm -rf dist; webpack --colors;",
-    "watch": "rm -rf dist; ./webpack-dev-server.js",
+    "watch": "./webpack-dev-server.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "GethsLeader <GethsLeader@gmail.com>",
