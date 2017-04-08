@@ -50,6 +50,10 @@ module.exports = new Promise((resolve, reject) => {
             filename: '[name].js'
         },
         resolve: {
+            modules: [
+                srcPath,
+                libsPath
+            ],
             extensions: ['.ts', '.js']
         },
         module: {
@@ -80,7 +84,19 @@ module.exports = new Promise((resolve, reject) => {
                         return `<title>${title} - ${applicationPackage.version}</title>`;
                     })
                     .replace(/<!-- LOADER INSERTION POINT -->/, (match) => {
-                        return `<script src="loader.js"></script>`;
+                        const loaderId = 'loader',
+                            loaderScript = 'loader.js';
+                        return `<noscript><div class="error"><h1>Error!</h1><h2>Your browser does not support JavaScript!</h2></div></noscript>
+<script>
+(function(document){
+    var loaderScript = document.createElement('script');
+    loaderScript.onerror = function loaderOnLoadError() {
+                            document.getElementById('${loaderId}').innerHTML = '<div class="error"><h1>Error!</h1><h2>Unable to load scripts!</h2></div>';
+                          };
+    loaderScript.src = '${loaderScript}';
+    document.body.appendChild(loaderScript);
+})(document);
+</script>`;
                     }).replace(/<!-- STYLES INSERTION POINT -->/, (match) => {
                         return `<link rel="stylesheet" href="styles.css">`;
                     });

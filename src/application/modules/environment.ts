@@ -1,30 +1,35 @@
-export class Environment {
+interface IApplication {
+    tag: string,
+    dom: HTMLElement,
+    name: string,
+    version: string
+    description: string,
+    author: string,
+    license: string
+}
+
+interface IEnvironment {
     production: boolean;
     debug: boolean;
-    application: {
-        tag: string,
-        dom: HTMLElement,
-        name: string,
-        version: string
-        description: string,
-        author: string,
-        license: string
-    };
+    application: IApplication
+}
 
-    constructor(properties: any) {
+export class Environment implements IEnvironment {
+    production: boolean;
+    debug: boolean;
+    application: IApplication;
+
+    constructor(properties?: IEnvironment) {
         if (properties) {
-            this._setProperties(properties);
+            this.assign(properties);
         }
     }
 
-    private _setProperties(properties: any) {
-        properties = properties ? properties : {};
-        if (!properties.application) {
-            throw new Error('Application properties cannot be empty!');
-        }
+    assign(properties: IEnvironment): Environment {
         this.production = properties.production || false;
         this.debug = properties.debug || false;
         this.application = properties.application;
+        return this;
     };
 
     escapeTagName(name?: string) {
@@ -32,5 +37,18 @@ export class Environment {
             name = this.application.name;
         }
         return name.replace(/[^a-zA-Z0-9.]/g, '').toLowerCase();
+    }
+}
+
+export class Defer {
+    promise: Promise<boolean>;
+    resolve: Function;
+    reject: Function;
+
+    constructor() {
+        this.promise = new Promise((resolve, reject) => {
+            this.resolve = resolve;
+            this.reject = reject;
+        });
     }
 }

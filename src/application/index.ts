@@ -2,11 +2,13 @@ import 'zone.js/dist/zone';
 import {NgModule, enableProdMode} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
-import {debug} from './modules/debug';
-import {Root} from './components/root';
+import {debug} from 'application/modules/debug';
+import {Environment} from 'application/modules/environment';
+import {Loader} from 'application/modules/loader';
+import {Root} from 'application/components/root';
 
-declare let environment: any; // getting environment from loader application
-declare let loader: any; // getting loader itself from loader application
+declare let environment: Environment; // getting environment from loader application
+declare let loader: Loader; // getting loader itself from loader application
 
 if (!environment) {
     throw new Error('Application configuration not initialized!');
@@ -37,7 +39,7 @@ loader.loaded() // when application loaded
         }
         return platformBrowserDynamic().bootstrapModule(Application)
     })
-    .then((application: any) => {
+    .then(() => {
         debug.log('Application initialization finished.');
     })
     .catch((error) => {
