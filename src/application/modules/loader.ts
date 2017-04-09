@@ -158,6 +158,7 @@ export class Loader {
             .then(() => {
                 let parent: Node = this.dom.parentNode;
                 parent.removeChild(this.dom);
+                environment.application.dom.innerHTML = `<div class="loading"><i>Loading...</i></div>`;
                 this._loaded.resolve(true);
                 this._loaded = null;
             })

@@ -43,5 +43,6 @@ loader.loaded() // when application loaded
         debug.log('Application initialization finished.');
     })
     .catch((error) => {
+        environment.application.dom.innerHTML = `<div class="error"><h1>Error!</h1><h2>"${error.message}"</h2></div>`;
         throw error;
     });
