@@ -40,7 +40,7 @@ npm link webpack
 ```
 npm install -g less
 
-mpn link less
+npm link less
 ```
 ##### Karma CLI:
 ```
