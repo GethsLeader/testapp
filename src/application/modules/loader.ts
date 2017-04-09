@@ -63,7 +63,8 @@ export class Progress {
 
 export class Loader {
     environmentUrl: string = '/environment.json';
-    applicationUrl: string;
+    applicationScriptUrl: string;
+    applicationStyleUrl: string;
     dom: HTMLElement = document.getElementById('loader');
     progress: Progress;
     private _loaded: Defer = new Defer();
@@ -78,8 +79,22 @@ export class Loader {
         progressDom.innerHTML = `<div class="fill"></div>`;
         this.dom.appendChild(progressDom);
         this.progress = new Progress(<HTMLElement>progressDom.getElementsByClassName('fill')[0], 2);
-        this.progress.max = 1 /* init */ + 100 /* environment load */ + 100 /* application load */ + 1 /* finish */;
-        this.progress.value = 1;
+        this.progress.max = 2 /* init */
+            + 100 /* environment load */
+            + 100 /* application style load */
+            + 100 /* application script load */
+            + 1 /* finish */;
+        let noScriptElement: HTMLElement = document.getElementsByTagName('noscript')[0],
+            scriptsElements: NodeListOf<HTMLScriptElement> = document.getElementsByTagName('script');
+        this.progress.max += scriptsElements.length; // dom scripts cut
+        this.progress.value = 2;
+        noScriptElement.parentNode.removeChild(noScriptElement);
+        this.progress.value++;
+        do {
+            scriptsElements[0].parentNode.removeChild(scriptsElements[0]);
+            scriptsElements = document.getElementsByTagName('script');
+            this.progress.value++;
+        } while (scriptsElements.length > 0);
         if (shouldToLoad) {
             this.load();
         }
@@ -104,11 +119,21 @@ export class Loader {
                 debug.log(`Application dom element created...`);
             })
             .then(() => {
-                this.applicationUrl = `/${environment.application.name}.js`;
-                return this._loadData(this.applicationUrl)
+                this.applicationStyleUrl = `/${environment.application.tag}.css`;
+                return this._loadData(this.applicationStyleUrl)
             })
             .then((data: any) => {
-                debug.log(`Application file loaded...`);
+                debug.log(`Application style file loaded...`);
+                let style: HTMLElement = document.createElement('style');
+                style.innerHTML = data;
+                document.head.appendChild(style);
+            })
+            .then(() => {
+                this.applicationScriptUrl = `/${environment.application.tag}.js`;
+                return this._loadData(this.applicationScriptUrl)
+            })
+            .then((data: any) => {
+                debug.log(`Application script file loaded...`);
                 debug.log(` * starting eval...`);
                 try {
                     debug.log('\n    loader:', loader, '\n    environment:', environment);
@@ -117,9 +142,9 @@ export class Loader {
                     script.innerHTML =
                         `/*
  --- APPLICATION "${environment.application.name}" (${environment.application.version}) INJECTED ---
- - From: "${this.applicationUrl[0] === '/'
-                            ? location.protocol + '//' + location.host + this.applicationUrl
-                            : this.applicationUrl}" -
+ - From: "${this.applicationScriptUrl[0] === '/'
+                            ? location.protocol + '//' + location.host + this.applicationScriptUrl
+                            : this.applicationScriptUrl}" -
  - Author: ${environment.application.author} -
  - License: ${environment.application.license} -
 */`;

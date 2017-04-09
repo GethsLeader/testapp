@@ -9,10 +9,21 @@ const WebpackDevServer = require('webpack-dev-server');
 // loading config
 require(path.join(__dirname, 'webpack.config.js'))
     .then((config) => {
-        config.entry['loader'].unshift("webpack-dev-server/client?http://localhost:8000/");
+        config.entry['init'].unshift('webpack-dev-server/client?http://localhost:8000/');
         const server = new WebpackDevServer(webpack(config), {
+            contentBase: path.join(__dirname, 'dist'),
+            compress: true,
             inline: true,
-            hot: true
+            hot: true,
+            staticOptions: {},
+            watchOptions: {
+                aggregateTimeout: 300,
+                poll: 1000,
+                ignored: /node_modules/
+            },
+            stats: {
+                colors: true,
+            }
         });
         server.listen(8000);
     })

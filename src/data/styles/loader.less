@@ -1,3 +1,8 @@
+@noScriptBodyColor: #5d0800;
+@noScriptBodyColorStart: #8e0b00;
+@noScriptBodyColorEnd: #3b0300;
+
+@noScriptTextColor: #fefefe;
 @loaderErrorTextColor: #8e0b00;
 @loaderProgressBarColor: #cecece;
 @loaderProgressBarBordersColor: #989898;
@@ -5,21 +10,76 @@
 @loaderProgressFillColorStart: #01df00;
 @loaderProgressFillColorEnd: #015600;
 
+html, body {
+  display: block;
+  margin: 0;
+  padding: 0;
+}
+
+noscript {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  border: 1px solid #8e0b00;
+  background: @noScriptBodyColor linear-gradient(180deg, @noScriptBodyColorStart, @noScriptBodyColorEnd);
+  .error {
+    color: @noScriptTextColor;
+    margin: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    h1 {
+      display: inline;
+      font-size: 20px;
+      margin-right: 8px;
+    }
+    h2 {
+      display: inline;
+      font-size: 16px;
+    }
+
+    @media only screen and (min-width: 291px) and (max-width: 370px) {
+      margin: 8px;
+      h1 {
+        font-size: 16px;
+      }
+
+      h2 {
+        font-size: 12px;
+      }
+    }
+    @media only screen and (max-width: 290px) {
+      margin: 8px;
+      h1 {
+        font-size: 12px;
+      }
+
+      h2 {
+        font-size: 8px;
+      }
+    }
+  }
+}
+
 #loader {
   width: 230px;
-  height: 100px;
+  height: 60px;
   padding: 8px;
   margin: 100px auto 0 auto;
   text-align: center;
 
   div.progress {
+    box-sizing: content-box;
     width: 200px;
     height: 20px;
     padding: 2px;
+    margin: auto;
     background: @loaderProgressBarColor;
     border: 1px solid @loaderProgressBarBordersColor;
     border-radius: 6px;
     .fill {
+      box-sizing: content-box;
       position: relative;
       background: @loaderProgressFillColor linear-gradient(180deg, @loaderProgressFillColorStart, @loaderProgressFillColorEnd);
       height: 100%;

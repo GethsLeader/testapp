@@ -4,15 +4,20 @@ const fs = require('fs');
 const child_process = require('child_process');
 const webpack = require('webpack');
 const htmlMinifier = require('html-minifier');
-const CleanCSS = require('clean-css');
 
 // plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const SimpleLessBuilder = require(path.join(__dirname, 'simple-less-builder'));
 
 // default paths
 const distPath = path.resolve(__dirname, './dist');
 const srcPath = path.resolve(__dirname, './src');
 const libsPath = path.resolve(__dirname, './node_modules');
+
+// helpers
+function escapeTagName(name) {
+    return name.replace(/[^a-zA-Z0-9.]/g, '').toLowerCase();
+}
 
 module.exports = new Promise((resolve, reject) => {
     // application package
@@ -22,13 +27,13 @@ module.exports = new Promise((resolve, reject) => {
     const buildMode = process.env.WEBPACK_ENV || process.env.NODE_ENV || 'development';
     const isDebug = buildMode === 'development' || buildMode === 'debug' || buildMode === 'test';
     const isProduction = buildMode === 'production';
-    const isTest = buildMode === 'test' || buildMode === 'debug';
 
     // applications environment configuration
     const applicationsEnvironment = {
         production: isProduction,
         debug: isDebug,
         application: {
+            tag: escapeTagName(applicationPackage.name),
             name: applicationPackage.name,
             version: applicationPackage.version,
             description: applicationPackage.description,
@@ -44,6 +49,7 @@ module.exports = new Promise((resolve, reject) => {
 
     // basic webpack configuration
     const webpackConfig = {
+        name: `${applicationsEnvironment.application.tag}-${isProduction ? 'production' : 'development'}`,
         entry: {},
         output: {
             path: distPath,
@@ -69,7 +75,21 @@ module.exports = new Promise((resolve, reject) => {
                 {
                     // relative paths for angular async route calls
                 }
-            )
+            ),
+            new SimpleLessBuilder({
+                src: srcPath,
+                minimize: isProduction,
+                files: [
+                    {
+                        from: path.join(srcPath, 'data', 'styles', 'loader.less'),
+                        to: path.join(distPath, 'loader.css')
+                    },
+                    {
+                        from: path.join(srcPath, 'data', 'styles', 'application.less'),
+                        to: path.join(distPath, applicationsEnvironment.application.tag + '.css')
+                    }
+                ]
+            })
         ]
     };
 
@@ -83,22 +103,23 @@ module.exports = new Promise((resolve, reject) => {
                     .replace(/<title>(.*)<\/title>/, (match, title) => {
                         return `<title>${title} - ${applicationPackage.version}</title>`;
                     })
-                    .replace(/<!-- LOADER INSERTION POINT -->/, (match) => {
+                    .replace(/<!-- LOADER SCRIPTS INSERTION POINT -->/, (match) => {
                         const loaderId = 'loader',
-                            loaderScript = 'loader.js';
-                        return `<noscript><div class="error"><h1>Error!</h1><h2>Your browser does not support JavaScript!</h2></div></noscript>
-<script>
+                            loaderScript = 'init.js';
+                        return `<script>
 (function(document){
-    var loaderScript = document.createElement('script');
+    var loaderElement = document.getElementById('${loaderId}'),
+        loaderScript = document.createElement('script');
+    loaderElement.innerHTML = 'Loading...';
     loaderScript.onerror = function loaderOnLoadError() {
-                            document.getElementById('${loaderId}').innerHTML = '<div class="error"><h1>Error!</h1><h2>Unable to load scripts!</h2></div>';
+                            loaderElement.innerHTML = '<div class="error"><h1>Error!</h1><h2>Unable to load scripts!</h2></div>';
                           };
     loaderScript.src = '${loaderScript}';
     document.body.appendChild(loaderScript);
 })(document);
 </script>`;
-                    }).replace(/<!-- STYLES INSERTION POINT -->/, (match) => {
-                        return `<link rel="stylesheet" href="styles.css">`;
+                    }).replace(/<!-- LOADER STYLES INSERTION POINT -->/, (match) => {
+                        return `<link rel="stylesheet" href="loader.css">`;
                     });
                 if (isProduction) {
                     fileContent = htmlMinifier.minify(fileContent, {
@@ -117,16 +138,6 @@ module.exports = new Promise((resolve, reject) => {
         { // environment file
             from: path.join(srcPath, 'data', 'environment.json'),
             to: path.join(distPath, 'environment.json')
-        },
-        { // styles file
-            from: path.join(srcPath, 'data', 'styles', 'styles.css'),
-            to: path.join(distPath, 'styles.css'),
-            transform: function (fileContent, filePath) {
-                if (isProduction) {
-                    return new CleanCSS({}).minify(fileContent).styles;
-                }
-                return fileContent;
-            }
         },
         { // components views files
             context: path.join(srcPath, 'data', 'views'),
@@ -155,8 +166,8 @@ module.exports = new Promise((resolve, reject) => {
     );
 
     // application entry to entries
-    webpackConfig.entry['loader'] = ['babel-polyfill', path.join(srcPath, 'application', 'loader')];
-    webpackConfig.entry[applicationsEnvironment.application.name] = [path.join(srcPath, 'application', 'index')];
+    webpackConfig.entry['init'] = ['babel-polyfill', path.join(srcPath, 'application', 'init')];
+    webpackConfig.entry[applicationsEnvironment.application.tag] = [path.join(srcPath, 'application', 'run')];
 
     // minimization (only for production)
     if (isProduction) {
@@ -173,32 +184,6 @@ module.exports = new Promise((resolve, reject) => {
         webpackConfig.plugins = webpackConfig.plugins.concat([]);
     }
 
-    // test preparation
-    if (isTest) {
-        webpackConfig.entry['specs'] = ['babel-polyfill', path.join(srcPath, 'test', 'loader.spec')];
-        filesToCopy.push({
-            // spec entry point
-            from: path.join(srcPath, 'test', 'specs.html'),
-            to: path.join(distPath, 'specs.html'),
-            transform: function (fileContent, filePath) {
-                fileContent = fileContent.toString()
-                    .replace(/<title>(.*)<\/title>/, (match, title) => {
-                        return `<title>${title} (${applicationPackage.name} - ${applicationPackage.version})</title>`;
-                    })
-                    .replace(/<!-- SPECS INSERTION POINT -->/, (match) => {
-                        return `<script src="specs.js"></script>`;
-                    });
-                return fileContent;
-            }
-        });
-    }
-
-    // styles compilation
-    child_process.exec(`lessc ${path.join(srcPath, 'data', 'styles', 'styles.less')}  ${path.join(srcPath, 'data', 'styles', 'styles.css')}`,
-        (error, stdout, stderr) => {
-            if (error || stderr) {
-                return reject(error || stderr);
-            }
-            return resolve(webpackConfig);
-        });
+    // done
+    return resolve(webpackConfig);
 });
