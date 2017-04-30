@@ -1,8 +1,8 @@
-// import {Environment} from './modules/environment';
-// import {Debug, debug} from './modules/debug';
+//import {Environment} from './modules/environment';
 
 describe('test', function () {
-    it("should be null", function () {
+    //console.log(Environment);
+    it('should be null', function () {
         let x = null;
         expect(x).toBe(null);
     });
