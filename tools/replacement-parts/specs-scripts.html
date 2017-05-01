@@ -1,0 +1,27 @@
+<script>
+    (function (document) {
+        var testElement = document.getElementById('test'),
+            testScript = document.createElement('script');
+
+        function cleanUp() {
+            var noScriptElement = document.getElementsByTagName('noscript')[0],
+                scriptsElements = document.getElementsByTagName('script');
+            noScriptElement.parentNode.removeChild(noScriptElement);
+            do {
+                scriptsElements[0].parentNode.removeChild(scriptsElements[0]);
+                scriptsElements = document.getElementsByTagName('script');
+            } while (scriptsElements.length > 0);
+        }
+
+        testElement.innerHTML = 'Specification loading...';
+        testScript.onerror = function testOnLoadError() {
+            testElement.innerHTML = '<div class="error"><h1>Error!</h1><h2>Unable to load scripts!</h2></div>';
+        };
+        testScript.onload = function () {
+            document.body.removeChild(testElement);
+            cleanUp();
+        };
+        testScript.src = 'test.js';
+        document.body.appendChild(testScript);
+    })(document);
+</script>

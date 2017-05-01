@@ -1,0 +1,50 @@
+@noScriptBodyColor: #5d0800;
+@noScriptBodyColorStart: #8e0b00;
+@noScriptBodyColorEnd: #3b0300;
+@noScriptTextColor: #fefefe;
+
+noscript {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 40px;
+  border: 1px solid #8e0b00;
+  background: @noScriptBodyColor linear-gradient(180deg, @noScriptBodyColorStart, @noScriptBodyColorEnd);
+  .error {
+    color: @noScriptTextColor;
+    margin: 6px;
+    overflow: hidden;
+    white-space: nowrap;
+    h1 {
+      display: inline;
+      font-size: 20px;
+      margin-right: 8px;
+    }
+    h2 {
+      display: inline;
+      font-size: 16px;
+    }
+
+    @media only screen and (min-width: 291px) and (max-width: 370px) {
+      margin: 8px;
+      h1 {
+        font-size: 16px;
+      }
+
+      h2 {
+        font-size: 12px;
+      }
+    }
+    @media only screen and (max-width: 290px) {
+      margin: 8px;
+      h1 {
+        font-size: 12px;
+      }
+
+      h2 {
+        font-size: 8px;
+      }
+    }
+  }
+}

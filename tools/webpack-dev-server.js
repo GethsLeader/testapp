@@ -7,7 +7,7 @@ const webpack = require('webpack');
 const WebpackDevServer = require('webpack-dev-server');
 
 // loading config
-require(path.join(__dirname, 'webpack.config.js'))
+require(path.resolve(__dirname, '../webpack.config.js'))
     .then((config) => {
         config.entry['init'].unshift('webpack-dev-server/client?http://localhost:8000/');
         const server = new WebpackDevServer(webpack(config), {

@@ -2,7 +2,7 @@ import {Component} from '@angular/core';
 import {debug} from 'application/modules/debug';
 import {Environment} from 'application/modules/environment';
 
-declare let environment: Environment; // getting environment from loader application
+let environment: Environment = window['environment'];
 
 @Component({
     selector: environment.application.tag,

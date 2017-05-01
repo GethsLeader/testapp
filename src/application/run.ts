@@ -7,8 +7,8 @@ import {Environment} from 'application/modules/environment';
 import {Loader} from 'application/modules/loader';
 import {Root} from 'application/components/root';
 
-declare let environment: Environment; // getting environment from loader application
-declare let loader: Loader; // getting loader itself from loader application
+let loader: Loader = window['loader'];
+let environment: Environment = window['environment'];
 
 if (!environment) {
     throw new Error('Application configuration not initialized!');

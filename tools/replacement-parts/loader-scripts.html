@@ -1,0 +1,12 @@
+<script>
+    (function (document) {
+        var loaderElement = document.getElementById('$1'),
+            loaderScript = document.createElement('script');
+        loaderElement.innerHTML = 'Loading...';
+        loaderScript.onerror = function loaderOnLoadError() {
+            loaderElement.innerHTML = '<div class="error"><h1>Error!</h1><h2>Unable to load scripts!</h2></div>';
+        };
+        loaderScript.src = '$2';
+        document.body.appendChild(loaderScript);
+    })(document);
+</script>

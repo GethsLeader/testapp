@@ -25,17 +25,14 @@
     "core-js": "^2.4.1",
     "html-minifier": "^3.4.2",
     "jasmine": "^2.5.3",
-    "karma": "^1.5.0",
-    "karma-chrome-launcher": "^2.0.0",
-    "karma-jasmine": "^1.1.0",
-    "karma-typescript": "^2.1.7",
+    "jasmine-core": "^2.6.1",
     "ts-loader": "^2.0.3",
     "webpack-dev-server": "^2.4.2"
   },
   "scripts": {
     "build": "rm -rf dist; webpack --colors;",
-    "watch": "./webpack-dev-server.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "watch": "node ./tools/webpack-dev-server.js",
+    "test": "echo \"Error: build/watch project with test enviroment variable (WEBPACK_ENV or NODE_ENV) for access to tests!\" && exit 1"
   },
   "author": "GethsLeader <GethsLeader@gmail.com>",
   "license": "MIT"

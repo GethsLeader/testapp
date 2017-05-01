@@ -101,11 +101,11 @@ export class Loader {
     }
 
     load() {
-        let environment: Environment,
-            loader: Loader = this;
-        this._loadData(this.environmentUrl)
+        let environment: Environment;
+        Loader._loadData(this.environmentUrl, this.progress)
             .then((data: string) => {
                 environment = new Environment(JSON.parse(data));
+                window['environment'] = environment;
             })
             .then(() => {
                 debug.debugMode = environment.debug;
@@ -120,7 +120,7 @@ export class Loader {
             })
             .then(() => {
                 this.applicationStyleUrl = `/${environment.application.tag}.css`;
-                return this._loadData(this.applicationStyleUrl)
+                return Loader._loadData(this.applicationStyleUrl, this.progress)
             })
             .then((data: any) => {
                 debug.log(`Application style file loaded...`);
@@ -130,13 +130,13 @@ export class Loader {
             })
             .then(() => {
                 this.applicationScriptUrl = `/${environment.application.tag}.js`;
-                return this._loadData(this.applicationScriptUrl)
+                return Loader._loadData(this.applicationScriptUrl, this.progress)
             })
             .then((data: any) => {
                 debug.log(`Application script file loaded...`);
                 debug.log(` * starting eval...`);
                 try {
-                    debug.log('\n    loader:', loader, '\n    environment:', environment);
+                    debug.log('\n    loader:', this, '\n    environment:', environment);
                     eval(data);
                     let script: HTMLElement = document.createElement('script');
                     script.innerHTML =
@@ -180,7 +180,7 @@ export class Loader {
         return this._loaded.promise;
     }
 
-    _loadData(url: string): Promise<any> {
+    static _loadData(url: string, progress?: Progress): Promise<any> {
         return new Promise((resolve, reject) => {
             let request: XMLHttpRequest = new XMLHttpRequest();
             if ('onprogress' in request) {
@@ -188,7 +188,9 @@ export class Loader {
                 request.onprogress = (event) => {
                     let currentProgressCheck = Math.round(100 / event.total * event.loaded);
                     if (currentProgressCheck - lastProgressCheck > 0) {
-                        this.progress.value += currentProgressCheck - lastProgressCheck;
+                        if (progress) {
+                            progress.value += currentProgressCheck - lastProgressCheck;
+                        }
                         lastProgressCheck = currentProgressCheck;
                     }
                 };
@@ -197,7 +199,9 @@ export class Loader {
                 if (request.readyState === XMLHttpRequest.DONE) {
                     if (request.status === 200) {
                         if (!('onprogress' in request)) {
-                            this.progress.value += 100;
+                            if (progress) {
+                                progress.value += 100;
+                            }
                         }
                         return resolve(request.responseText);
                     } else {

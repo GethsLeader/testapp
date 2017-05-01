@@ -1,18 +1,22 @@
 // basic imports
 const path = require('path');
 const fs = require('fs');
+const os = require('os');
 const child_process = require('child_process');
 const webpack = require('webpack');
 const htmlMinifier = require('html-minifier');
+const replacer = require(path.join(__dirname, 'tools', 'modules', 'replacer'));
 
 // plugins
 const CopyWebpackPlugin = require('copy-webpack-plugin');
-const SimpleLessBuilder = require(path.join(__dirname, 'simple-less-builder'));
+const SimpleLessBuilder = require(path.join(__dirname, 'tools', 'webpack-plugins', 'simple-less-builder'));
 
 // default paths
-const distPath = path.resolve(__dirname, './dist');
-const srcPath = path.resolve(__dirname, './src');
-const libsPath = path.resolve(__dirname, './node_modules');
+const distPath = path.join(__dirname, 'dist');
+const srcPath = path.join(__dirname, 'src');
+const libsPath = path.join(__dirname, 'node_modules');
+const partsPath = path.join(__dirname, 'tools', 'replacement-parts');
+const tmpPath = os.tmpdir();
 
 // helpers
 function escapeTagName(name) {
@@ -26,6 +30,7 @@ module.exports = new Promise((resolve, reject) => {
     // default environment variables
     const buildMode = process.env.WEBPACK_ENV || process.env.NODE_ENV || 'development';
     const isDebug = buildMode === 'development' || buildMode === 'debug' || buildMode === 'test';
+    const isTest = buildMode === 'test';
     const isProduction = buildMode === 'production';
 
     // applications environment configuration
@@ -87,6 +92,10 @@ module.exports = new Promise((resolve, reject) => {
                     {
                         from: path.join(srcPath, 'data', 'styles', 'application.less'),
                         to: path.join(distPath, applicationsEnvironment.application.tag + '.css')
+                    },
+                    {
+                        from: path.join(srcPath, 'data', 'styles', 'test.less'),
+                        to: path.join(distPath, 'test.css')
                     }
                 ]
             })
@@ -95,46 +104,6 @@ module.exports = new Promise((resolve, reject) => {
 
     // files copying configuration
     let filesToCopy = [
-        { // entry point
-            from: path.join(srcPath, 'application', 'view.html'),
-            to: path.join(distPath, 'index.html'),
-            transform: function (fileContent, filePath) {
-                fileContent = fileContent.toString()
-                    .replace(/<title>(.*)<\/title>/, (match, title) => {
-                        return `<title>${title} - ${applicationPackage.version}</title>`;
-                    })
-                    .replace(/<!-- LOADER SCRIPTS INSERTION POINT -->/, (match) => {
-                        const loaderId = 'loader',
-                            loaderScript = 'init.js';
-                        return `<script>
-(function(document){
-    var loaderElement = document.getElementById('${loaderId}'),
-        loaderScript = document.createElement('script');
-    loaderElement.innerHTML = 'Loading...';
-    loaderScript.onerror = function loaderOnLoadError() {
-                            loaderElement.innerHTML = '<div class="error"><h1>Error!</h1><h2>Unable to load scripts!</h2></div>';
-                          };
-    loaderScript.src = '${loaderScript}';
-    document.body.appendChild(loaderScript);
-})(document);
-</script>`;
-                    }).replace(/<!-- LOADER STYLES INSERTION POINT -->/, (match) => {
-                        return `<link rel="stylesheet" href="loader.css">`;
-                    });
-                if (isProduction) {
-                    fileContent = htmlMinifier.minify(fileContent, {
-                        useShortDoctype: true,
-                        removeAttributeQuotes: true,
-                        removeRedundantAttributes: true,
-                        removeComments: true,
-                        collapseWhitespace: true,
-                        collapseInlineTagWhitespace: true,
-                        collapseBooleanAttributes: true
-                    });
-                }
-                return fileContent;
-            }
-        },
         { // environment file
             from: path.join(srcPath, 'data', 'environment.json'),
             to: path.join(distPath, 'environment.json')
@@ -159,6 +128,80 @@ module.exports = new Promise((resolve, reject) => {
             }
         }
     ];
+
+    if (isTest) {
+        // jasmine standalone scripts
+        filesToCopy.push({
+            from: path.join(libsPath, 'jasmine-core', 'lib', 'jasmine-core', 'jasmine.js'),
+            to: path.join(distPath, 'jasmine', 'jasmine.js')
+        });
+        filesToCopy.push({
+            from: path.join(libsPath, 'jasmine-core', 'lib', 'jasmine-core', 'jasmine-html.js'),
+            to: path.join(distPath, 'jasmine', 'jasmine-html.js')
+        });
+        filesToCopy.push({
+            from: path.join(libsPath, 'jasmine-core', 'lib', 'jasmine-core', 'boot.js'),
+            to: path.join(distPath, 'jasmine', 'boot.js')
+        });
+        filesToCopy.push({
+            from: path.join(libsPath, 'jasmine-core', 'lib', 'jasmine-core', 'jasmine.css'),
+            to: path.join(distPath, 'jasmine', 'jasmine.css')
+        });
+        // test entry point
+        filesToCopy.push({
+            from: path.join(srcPath, 'test', 'view.html'),
+            to: path.join(distPath, 'specs.html'),
+            transform: function (fileContent, filePath) {
+                fileContent = fileContent.toString()
+                    .replace(/<title>(.*)<\/title>/, (match, title) => {
+                        return replacer(fs.readFileSync(path.join(partsPath, 'title.html')), [title, applicationPackage.version]);
+                    })
+                    .replace(/<!-- JASMINE STYLES INSERTION POINT -->/, () => {
+                        return fs.readFileSync(path.join(partsPath, 'jasmine-styles.html'));
+                    })
+                    .replace(/<!-- SPECS STYLES INSERTION POINT -->/, () => {
+                        return fs.readFileSync(path.join(partsPath, 'specs-styles.html'));
+                    })
+                    .replace(/<!-- JASMINE SCRIPTS INSERTION POINT -->/, () => {
+                        return fs.readFileSync(path.join(partsPath, 'jasmine-scripts.html'));
+                    })
+                    .replace(/<!-- SPECS SCRIPTS INSERTION POINT -->/, () => {
+                        return fs.readFileSync(path.join(partsPath, 'specs-scripts.html'));
+                    });
+                return fileContent;
+            }
+        });
+    }
+
+    // application entry point
+    filesToCopy.push({
+        from: path.join(srcPath, 'application', 'view.html'),
+        to: path.join(distPath, 'index.html'),
+        transform: function (fileContent, filePath) {
+            fileContent = fileContent.toString()
+                .replace(/<title>(.*)<\/title>/, (match, title) => {
+                    return replacer(fs.readFileSync(path.join(partsPath, 'title.html')), [title, applicationPackage.version]);
+                })
+                .replace(/<!-- LOADER SCRIPTS INSERTION POINT -->/, () => {
+                    return replacer(fs.readFileSync(path.join(partsPath, 'loader-scripts.html')), ['loader', 'init.js']);
+                }).replace(/<!-- LOADER STYLES INSERTION POINT -->/, () => {
+                    return fs.readFileSync(path.join(partsPath, 'loader-styles.html'));
+                });
+            if (isProduction) {
+                fileContent = htmlMinifier.minify(fileContent, {
+                    useShortDoctype: true,
+                    removeAttributeQuotes: true,
+                    removeRedundantAttributes: true,
+                    removeComments: true,
+                    collapseWhitespace: true,
+                    collapseInlineTagWhitespace: true,
+                    collapseBooleanAttributes: true
+                });
+            }
+            return fileContent;
+        }
+    });
+
     webpackConfig.plugins.push(new CopyWebpackPlugin(filesToCopy,
         {
             copyUnmodified: false
@@ -166,6 +209,9 @@ module.exports = new Promise((resolve, reject) => {
     );
 
     // application entry to entries
+    if (isTest) {
+        webpackConfig.entry['test'] = ['babel-polyfill', path.join(srcPath, 'test', 'run')];
+    }
     webpackConfig.entry['init'] = ['babel-polyfill', path.join(srcPath, 'application', 'init')];
     webpackConfig.entry[applicationsEnvironment.application.tag] = [path.join(srcPath, 'application', 'run')];
 
