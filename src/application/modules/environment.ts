@@ -1,5 +1,6 @@
 interface IApplication {
     tag: string,
+    url: string,
     dom: HTMLElement,
     name: string,
     version: string

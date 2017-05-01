@@ -81,6 +81,7 @@ export class Loader {
         this.progress = new Progress(<HTMLElement>progressDom.getElementsByClassName('fill')[0], 2);
         this.progress.max = 2 /* init */
             + 100 /* environment load */
+            + 1 /* base dom preparation */
             + 100 /* application style load */
             + 100 /* application script load */
             + 1 /* finish */;
@@ -110,6 +111,15 @@ export class Loader {
             .then(() => {
                 debug.debugMode = environment.debug;
                 debug.log(`Environment file loaded...`);
+            })
+            .then(() => {
+                if (environment.application.url) {
+                    let baseElement: HTMLBaseElement = document.createElement('base');
+                    baseElement.href = environment.application.url;
+                    document.getElementsByTagName('head')[0].appendChild(baseElement);
+                    debug.log(`Base tag for url "${environment.application.url}" appended...`);
+                    this.progress.value += 1;
+                }
             })
             .then(() => {
                 environment.application.tag = environment.escapeTagName();

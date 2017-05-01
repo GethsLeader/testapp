@@ -35,6 +35,7 @@ function rootTests() {
         expect(component.environment.application).toBeDefined();
         expect(component.environment.application.name).toEqual('testapp');
         expect(component.environment.application.version).toEqual('testversion');
+        expect(component.environment.application.url).toEqual('/');
     });
 }
 

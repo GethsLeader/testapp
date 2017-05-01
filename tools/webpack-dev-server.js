@@ -12,6 +12,7 @@ require(path.resolve(__dirname, '../webpack.config.js'))
         config.entry['init'].unshift('webpack-dev-server/client?http://localhost:8000/');
         const server = new WebpackDevServer(webpack(config), {
             contentBase: path.join(__dirname, 'dist'),
+            historyApiFallback: true,
             compress: true,
             inline: true,
             hot: true,

@@ -2,10 +2,13 @@ import 'zone.js/dist/zone';
 import {NgModule, enableProdMode} from '@angular/core';
 import {BrowserModule} from '@angular/platform-browser';
 import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
+import {RouterModule} from '@angular/router';
+
 import {debug} from 'application/modules/debug';
 import {Environment} from 'application/modules/environment';
 import {Loader} from 'application/modules/loader';
 import {Root} from 'application/components/root';
+import {Home} from 'application/components/home';
 
 let loader: Loader = window['loader'];
 let environment: Environment = window['environment'];
@@ -26,8 +29,11 @@ debug.log(`* license: ${environment.application.license}`);
 loader.loaded() // when application loaded
     .then(() => {
         @NgModule({
-            imports: [BrowserModule],
-            declarations: [Root],
+            imports: [BrowserModule, RouterModule.forRoot([
+                {path: '', redirectTo: 'home', pathMatch: 'full'},
+                {path: 'home', component: Home}
+            ])],
+            declarations: [Root, Home],
             providers: [],
             bootstrap: [Root]
         })

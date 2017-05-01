@@ -1,6 +1,6 @@
 {
   "name": "testapp",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "Simple test application for test Angular framework and other chained stuff xD",
   "main": "/dist/index.html",
   "private": true,
@@ -10,6 +10,7 @@
     "@angular/core": "^4.0.1",
     "@angular/platform-browser": "^4.0.1",
     "@angular/platform-browser-dynamic": "^4.0.1",
+    "@angular/router": "^4.1.0",
     "rxjs": "^5.2.0",
     "zone.js": "^0.8.5"
   },

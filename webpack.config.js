@@ -38,7 +38,8 @@ module.exports = new Promise((resolve, reject) => {
         production: isProduction,
         debug: isDebug,
         application: {
-            tag: escapeTagName(applicationPackage.name),
+            tag: escapeTagName(applicationPackage.name), // application selector
+            url: '/', // application <base href="/something"> in head tag (for routing)
             name: applicationPackage.name,
             version: applicationPackage.version,
             description: applicationPackage.description,

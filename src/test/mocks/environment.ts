@@ -4,6 +4,7 @@ export default `
     "debug": true,
     "application": {
         "tag": "testapp",
+        "url": "/",
         "name":"testapp",
         "version": "testversion",
         "author": "Mock Author",
