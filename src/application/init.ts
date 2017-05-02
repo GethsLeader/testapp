@@ -1,5 +1,5 @@
 import {Loader} from 'application/modules/loader';
 
 window.onload = () => {
-    window['loader'] = new Loader();
+    window['loader'] = new Loader(true);
 };

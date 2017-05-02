@@ -1,17 +1,14 @@
 import {Component} from '@angular/core';
 import {debug} from 'application/modules/debug';
-import {Environment} from 'application/modules/environment';
-
-let environment: Environment = window['environment'];
+import {EnvironmentService} from 'application/services/environment';
 
 @Component({
-    selector: environment.application.tag,
-    templateUrl: '/views/root.html'
+    selector: EnvironmentService.environment.application.tag,
+    templateUrl: '/views/root.html',
+    providers: [EnvironmentService]
 })
 export class Root {
-    environment: Environment = environment;
-
-    constructor() {
+    constructor(public environmentService: EnvironmentService) {
         debug.log('Root component created.');
     }
 }

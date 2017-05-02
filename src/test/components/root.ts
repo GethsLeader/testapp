@@ -31,11 +31,11 @@ function rootTests() {
     });
 
     it(`should be with initialized environment`, () => {
-        expect(component.environment).toBeDefined();
-        expect(component.environment.application).toBeDefined();
-        expect(component.environment.application.name).toEqual('testapp');
-        expect(component.environment.application.version).toEqual('testversion');
-        expect(component.environment.application.url).toEqual('/');
+        expect(component.environmentService).toBeDefined();
+        expect(component.environmentService.application).toBeDefined();
+        expect(component.environmentService.application.name).toEqual('testapp');
+        expect(component.environmentService.application.version).toEqual('testversion');
+        expect(component.environmentService.application.url).toEqual('/');
     });
 }
 

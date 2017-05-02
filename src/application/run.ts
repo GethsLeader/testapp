@@ -5,28 +5,25 @@ import {platformBrowserDynamic} from '@angular/platform-browser-dynamic';
 import {RouterModule} from '@angular/router';
 
 import {debug} from 'application/modules/debug';
-import {Environment} from 'application/modules/environment';
-import {Loader} from 'application/modules/loader';
+import {LoaderService} from 'application/services/loader';
+import {EnvironmentService} from 'application/services/environment';
 import {Root} from 'application/components/root';
 import {Home} from 'application/components/home';
 
-let loader: Loader = window['loader'];
-let environment: Environment = window['environment'];
-
-if (!environment) {
+if (!EnvironmentService.environment) {
     throw new Error('Application configuration not initialized!');
 }
 
-debug.debugMode = environment.debug;
+debug.debugMode = EnvironmentService.environment.debug;
 
 debug.log('Application initialization started...');
-debug.log(`* application: "${environment.application.name}"`);
-debug.log(`* version: ${environment.application.version}`);
-debug.log(`* description: ${environment.application.description}`);
-debug.log(`* author: ${environment.application.author}`);
-debug.log(`* license: ${environment.application.license}`);
+debug.log(`* application: "${EnvironmentService.environment.application.name}"`);
+debug.log(`* version: ${EnvironmentService.environment.application.version}`);
+debug.log(`* description: ${EnvironmentService.environment.application.description}`);
+debug.log(`* author: ${EnvironmentService.environment.application.author}`);
+debug.log(`* license: ${EnvironmentService.environment.application.license}`);
 
-loader.loaded() // when application loaded
+LoaderService.loader.loaded() // when application loaded
     .then(() => {
         @NgModule({
             imports: [BrowserModule, RouterModule.forRoot([
@@ -40,7 +37,7 @@ loader.loaded() // when application loaded
         class Application {
         }
 
-        if (environment.production) {
+        if (EnvironmentService.environment.production) {
             enableProdMode();
         }
         return platformBrowserDynamic().bootstrapModule(Application)
@@ -49,6 +46,6 @@ loader.loaded() // when application loaded
         debug.log('Application initialization finished.');
     })
     .catch((error) => {
-        environment.application.dom.innerHTML = `<div class="error"><h1>Error!</h1><h2>"${error.message}"</h2></div>`;
+        EnvironmentService.environment.application.dom.innerHTML = `<div class="error"><h1>Error!</h1><h2>"${error.message}"</h2></div>`;
         throw error;
     });

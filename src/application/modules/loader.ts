@@ -67,38 +67,56 @@ export class Loader {
     applicationStyleUrl: string;
     dom: HTMLElement = document.getElementById('loader');
     progress: Progress;
+    private _shouldToLoad: boolean;
     private _loaded: Defer = new Defer();
 
-    constructor(shouldToLoad: boolean = true) {
-        // progress
-        if (!this.dom) {
-            throw new Error('No loader DOM detected!');
-        }
-        let progressDom: HTMLElement = document.createElement('div');
-        progressDom.className = 'progress';
-        progressDom.innerHTML = `<div class="fill"></div>`;
-        this.dom.appendChild(progressDom);
-        this.progress = new Progress(<HTMLElement>progressDom.getElementsByClassName('fill')[0], 2);
-        this.progress.max = 2 /* init */
-            + 100 /* environment load */
-            + 1 /* base dom preparation */
-            + 100 /* application style load */
-            + 100 /* application script load */
-            + 1 /* finish */;
-        let noScriptElement: HTMLElement = document.getElementsByTagName('noscript')[0],
-            scriptsElements: NodeListOf<HTMLScriptElement> = document.getElementsByTagName('script');
-        this.progress.max += scriptsElements.length; // dom scripts cut
-        this.progress.value = 2;
-        noScriptElement.parentNode.removeChild(noScriptElement);
-        this.progress.value++;
-        do {
-            scriptsElements[0].parentNode.removeChild(scriptsElements[0]);
-            scriptsElements = document.getElementsByTagName('script');
+    // constructor(shouldToLoad: boolean);
+    // constructor(loader: Loader);
+    constructor(shouldToLoadOrLoader?: boolean | Loader) {
+        if (!shouldToLoadOrLoader || shouldToLoadOrLoader === true) {
+            this._shouldToLoad = <boolean>shouldToLoadOrLoader;
+            // progress
+            if (!this.dom) {
+                throw new Error('No loader DOM detected!');
+            }
+            let progressDom: HTMLElement = document.createElement('div');
+            progressDom.className = 'progress';
+            progressDom.innerHTML = `<div class="fill"></div>`;
+            this.dom.appendChild(progressDom);
+            this.progress = new Progress(<HTMLElement>progressDom.getElementsByClassName('fill')[0], 2);
+            this.progress.max = 2 /* init */
+                + 100 /* environment load */
+                + 1 /* base dom preparation */
+                + 100 /* application style load */
+                + 100 /* application script load */
+                + 1 /* finish */;
+            let noScriptElement: HTMLElement = document.getElementsByTagName('noscript')[0],
+                scriptsElements: NodeListOf<HTMLScriptElement> = document.getElementsByTagName('script');
+            this.progress.max += scriptsElements.length; // dom scripts cut
+            this.progress.value = 2;
+            noScriptElement.parentNode.removeChild(noScriptElement);
             this.progress.value++;
-        } while (scriptsElements.length > 0);
-        if (shouldToLoad) {
-            this.load();
+            do {
+                scriptsElements[0].parentNode.removeChild(scriptsElements[0]);
+                scriptsElements = document.getElementsByTagName('script');
+                this.progress.value++;
+            } while (scriptsElements.length > 0);
+            if (this._shouldToLoad) {
+                this.load();
+            }
+        } else {
+            this.assign(<Loader>shouldToLoadOrLoader);
         }
+    }
+
+    assign(loader: Loader) {
+        this.environmentUrl = loader.environmentUrl;
+        this.applicationScriptUrl = loader.applicationScriptUrl;
+        this.applicationStyleUrl = loader.applicationStyleUrl;
+        this.dom = loader.dom;
+        this.progress = loader.progress;
+        this._shouldToLoad = loader._shouldToLoad;
+        this._loaded = loader._loaded;
     }
 
     load() {

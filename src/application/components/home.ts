@@ -1,17 +1,14 @@
 import {Component} from '@angular/core';
 import {debug} from 'application/modules/debug';
-import {Environment} from 'application/modules/environment';
-
-let environment: Environment = window['environment'];
+import {EnvironmentService} from 'application/services/environment';
 
 @Component({
-    selector: environment.application.tag,
-    templateUrl: '/views/home.html'
+    selector: EnvironmentService.environment.application.tag,
+    templateUrl: '/views/home.html',
+    providers: [EnvironmentService]
 })
 export class Home {
-    environment: Environment = environment;
-
-    constructor() {
+    constructor(private environmentService: EnvironmentService) {
         debug.log('Home component created.');
     }
 }
