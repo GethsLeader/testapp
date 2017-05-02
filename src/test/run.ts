@@ -26,6 +26,6 @@ describe('Loader tests', () => {
     loaderTests();
 });
 
-describe('Root component', () => {
+describe('Root component and environment service', () => {
     rootComponentTests();
 });
