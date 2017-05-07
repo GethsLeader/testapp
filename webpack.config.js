@@ -111,7 +111,7 @@ module.exports = new Promise((resolve, reject) => {
         },
         { // components views files
             context: path.join(srcPath, 'data', 'views'),
-            from: path.join('**/*.html'),
+            from: path.join('**', '*.html'),
             to: path.join(distPath, 'views'),
             transform: function (fileContent, filePath) {
                 if (isProduction) {

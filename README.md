@@ -68,5 +68,5 @@ Test
 ----
 
 If application was build/watch with __test__ in environment variables __WEBPACK_ENV__ or __NODE_ENV__ tests will available at:
-* `http://localhost:8000/specs.html` for development webpack server;
+* `http://localhost:8001` for development webpack server;
 * `dist/specs.html` for single-run build.

@@ -1,6 +1,6 @@
 {
   "name": "testapp",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "Simple test application for test Angular framework and other chained stuff xD",
   "main": "/dist/index.html",
   "private": true,
@@ -24,15 +24,17 @@
     "clean-css": "^4.0.10",
     "copy-webpack-plugin": "^4.0.1",
     "core-js": "^2.4.1",
+    "express": "^4.15.2",
     "html-minifier": "^3.4.2",
+    "istanbul": "^0.4.5",
     "jasmine": "^2.5.3",
     "jasmine-core": "^2.6.1",
     "ts-loader": "^2.0.3",
-    "webpack-dev-server": "^2.4.2"
+    "webpack-dev-middleware": "^1.10.2"
   },
   "scripts": {
     "build": "rm -rf dist; webpack --colors;",
-    "watch": "node ./tools/webpack-dev-server.js",
+    "watch": "node ./tools/webpack-server.js",
     "test": "echo \"Error: build/watch project with test enviroment variable (WEBPACK_ENV or NODE_ENV) for access to tests!\" && exit 1"
   },
   "author": "GethsLeader <GethsLeader@gmail.com>",
